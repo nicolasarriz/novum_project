@@ -1,0 +1,56 @@
+project:
+  name: crack_alerts
+  timezone: Europe/London
+  base_currency: USD
+
+universe:
+  crude:
+    - name: WTI
+      exchange: CME
+      symbol_prefix: CL
+      quote_units: USD/bbl
+    - name: Brent
+      exchange: ICE
+      symbol_prefix: BRN
+      quote_units: USD/bbl
+  products:
+    - name: RBOB Gasoline
+      exchange: CME
+      symbol_prefix: RB
+      quote_units: USD/gal
+      to_usd_per_bbl: "price * 42"
+    - name: ULSD (NY Harbor)
+      exchange: CME
+      symbol_prefix: HO
+      quote_units: USD/gal
+      to_usd_per_bbl: "price * 42"
+    - name: Low Sulphur Gasoil
+      exchange: ICE
+      symbol_prefix: G
+      quote_units: USD/mt
+      bbl_per_metric_ton: 7.45
+      to_usd_per_bbl: "price / bbl_per_metric_ton"
+
+fx:
+  provider: ECB
+  pairs:
+    - EURUSD
+    - GBPUSD
+    - USDEUR
+  fallback_provider: BoE
+
+spreads:
+  formulas:
+    crack_1_1: "prod_usd_per_bbl - crude_usd_per_bbl"
+    crack_3_2_1: "(2*gas_usd_per_bbl + 1*distillate_usd_per_bbl - 3*crude_usd_per_bbl) / 3"
+  mapping:
+    crude_for_us: WTI
+    crude_for_eu: Brent
+    gasoline: RBOB Gasoline
+    distillate_us: ULSD (NY Harbor)
+    distillate_eu: Low Sulphur Gasoil
+
+data_quality:
+  missing_threshold_days: 3
+  zscore_threshold: 2.0
+  roll_rule: "roll 5 business days before LTD/FND"
